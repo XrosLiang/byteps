@@ -496,9 +496,14 @@ bool RunPushLoopOnce() {
       auto len = task->len;
 
       char *data;
-      BPS_CHECK(task->cpubuff);
-      data =
-          const_cast<char *>(static_cast<const char *>(task->cpubuff) + offset);
+      // BPS_CHECK(task->cpubuff);
+      // data =
+      //     const_cast<char *>(static_cast<const char *>(task->cpubuff) + offset);
+      auto p = (char *)(tensor->data()) + offset;
+      if (task->device == CPU_DEVICE_ID) {
+        p = (char *)(task->gpu_ptr) + offset;
+      }
+      data = p;
 
       // get metadata
       const int dtype = task->tensor->dtype();
@@ -513,6 +518,7 @@ bool RunPushLoopOnce() {
     } else {
       // This is a dummy barrier for IsCrossPcieSwitch()
       BPS_CHECK(BytePSGlobal::IsCrossPcieSwitch());
+      assert(0);
       FinishOrProceed(task);
     }
   } else {
@@ -533,9 +539,14 @@ bool RunPullLoopOnce() {
     auto len = task->len;
 
     char *data;
-    BPS_CHECK(task->cpubuff);
-    data =
-        const_cast<char *>(static_cast<const char *>(task->cpubuff) + offset);
+    // BPS_CHECK(task->cpubuff);
+    // data =
+    //     const_cast<char *>(static_cast<const char *>(task->cpubuff) + offset);
+    auto p = (char *)(tensor->data()) + offset;
+    if (task->device == CPU_DEVICE_ID) {
+      p = (char *)(task->gpu_ptr) + offset;
+    }
+    data = p;
 
     // get metadata
     const int dtype = task->output->dtype();
